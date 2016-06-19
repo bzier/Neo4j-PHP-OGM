@@ -21,46 +21,43 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace HireVoice\Neo4j\Meta;
+namespace HireVoice\Neo4j\Tests\Entity\Vehicles;
+use HireVoice\Neo4j\Annotation as OGM;
 
-use HireVoice\Neo4j\Annotation\AnnotationReader;
-use HireVoice\Neo4j\Annotation\Reader;
-
-class Repository
+/**
+ * @OGM\Entity(labels="Car,Nissan")
+ */
+class Altima extends Car
 {
     /**
-     * @var \Doctrine\Common\Annotations\AnnotationReader
+     * @OGM\Auto
      */
-    private $reader;
+    protected $id;
 
     /**
-     * @var array
+     * @OGM\Property
+     * @OGM\Index
      */
-    private $metas = array();
+    protected $name;
 
-    /**
-     * @param Reader $annotationReader
-     */
-    function __construct(Reader $annotationReader = null)
+    function getId()
     {
-        if ($annotationReader instanceof Reader) {
-            $this->reader = $annotationReader;
-        } else {
-            $this->reader = new AnnotationReader;
-        }
+        return $this->id;
     }
 
-    /**
-     * @param $className
-     * @return Entity
-     */
-    function fromClass($className)
+    function setId($id)
     {
-        if (!isset($this->metas[$className])) {
-            $this->metas[$className] = Entity::fromClass($this->reader, $className, $this);
-        }
+        $this->id = $id;
+    }
 
-        return $this->metas[$className];
+    function getName()
+    {
+        return $this->name;
+    }
+
+    function setName($name)
+    {
+        $this->name = $name;
     }
 }
 

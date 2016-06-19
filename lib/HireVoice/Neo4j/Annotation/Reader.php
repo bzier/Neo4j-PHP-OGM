@@ -2,7 +2,7 @@
 /**
  * Copyright (C) 2012 Louis-Philippe Huberdeau
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
+ * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -21,46 +21,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace HireVoice\Neo4j\Meta;
+namespace HireVoice\Neo4j\Annotation;
 
-use HireVoice\Neo4j\Annotation\AnnotationReader;
-use HireVoice\Neo4j\Annotation\Reader;
+use Doctrine\Common\Annotations\Reader as BaseReader;
 
-class Repository
+interface Reader extends BaseReader
 {
-    /**
-     * @var \Doctrine\Common\Annotations\AnnotationReader
-     */
-    private $reader;
-
-    /**
-     * @var array
-     */
-    private $metas = array();
-
-    /**
-     * @param Reader $annotationReader
-     */
-    function __construct(Reader $annotationReader = null)
-    {
-        if ($annotationReader instanceof Reader) {
-            $this->reader = $annotationReader;
-        } else {
-            $this->reader = new AnnotationReader;
-        }
-    }
-
-    /**
-     * @param $className
-     * @return Entity
-     */
-    function fromClass($className)
-    {
-        if (!isset($this->metas[$className])) {
-            $this->metas[$className] = Entity::fromClass($this->reader, $className, $this);
-        }
-
-        return $this->metas[$className];
-    }
+    function getInheritedClassAnnotationArray(\ReflectionClass $class, $annotationName);
 }
 

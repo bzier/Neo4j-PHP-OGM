@@ -90,5 +90,72 @@ class EntityMetaTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(array('Location', 'City'), $names);
     }
+    
+    
+    /**
+     * FACTS:
+     * The Car class extends the Vehicle class. 
+     * The Car class has a 'Car' label.
+     * The Vehicle class has a 'Vehicle' label.
+     * EXPECTATION:
+     * The resulting label set for the Car class should include both labels.
+     */
+    function testObtainLabelsWithInheritance()
+    {
+        $repo = new MetaRepository;
+        $meta = $repo->fromClass('HireVoice\\Neo4j\\Tests\\Entity\\Vehicles\\Car');
+
+        $actual = $meta->getLabels();
+        $expected = array('Vehicle', 'Car');
+        
+        $this->assertSame(array_diff($expected, $actual), array_diff($actual, $expected));
+    }
+    
+    /**
+     * FACTS:
+     * The Tacoma class extends the Truck class.
+     * The Truck class extends the Vehicle class.
+     * The Tacoma class has a 'Toyota' label.
+     * The Truck class has no labels.
+     * The Vehicle class has a 'Vehicle' label.
+     * EXPECTATION:
+     * The resulting label set should include all labels from all levels of inheritance, but should
+     * not include any null values, despite a class in the inheritance chain not having any labels.
+     */
+    function testObtainLabelsWithInheritanceDoesNotIncludeNull()
+    {
+        $repo = new MetaRepository;
+        $meta = $repo->fromClass('HireVoice\\Neo4j\\Tests\\Entity\\Vehicles\\Tacoma');
+
+        $actual = $meta->getLabels();
+        $expected = array('Vehicle', 'Toyota');
+        
+        $this->assertSame(array_diff($expected, $actual), array_diff($actual, $expected));
+    }
+    
+    /**
+     * FACTS:
+     * The Altima class extends the Car class.
+     * The Car class extends the Vehicle class.
+     * The Car class has a 'Car' label. 
+     * The Altima class also has a 'Car' label.
+     * EXPECTATION:
+     * The resulting label set should include all labels from all levels of inheritance, but should
+     * not include any duplicate values, despite multiple classes in the inheritance chain having the same labels.
+     */
+    function testObtainLabelsWithInheritanceContainNoDuplicates()
+    {
+        $repo = new MetaRepository;
+        $meta = $repo->fromClass('HireVoice\\Neo4j\\Tests\\Entity\\Vehicles\\Altima');
+
+        $actual = $meta->getLabels();
+        $expected = array('Vehicle', 'Car', 'Nissan');
+        
+        // Results should be the same, but this doesn't account for duplicates
+        $this->assertSame(array_diff($expected, $actual), array_diff($actual, $expected));
+        
+        // Make sure they have the same count too
+        $this->assertEquals(count($expected), count($actual));
+    }
 }
 

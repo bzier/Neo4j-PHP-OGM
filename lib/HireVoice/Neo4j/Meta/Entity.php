@@ -23,7 +23,7 @@
 
 namespace HireVoice\Neo4j\Meta;
 
-use Doctrine\Common\Annotations\Reader as AnnotationReader;
+use HireVoice\Neo4j\Annotation\Reader as AnnotationReader;
 use HireVoice\Neo4j\Exception;
 use ReflectionProperty;
 
@@ -95,15 +95,23 @@ class Entity
         if (!$entity = $reader->getClassAnnotation($class, 'HireVoice\\Neo4j\\Annotation\\Entity')) {
             throw new Exception("Class $className is not declared as an entity.");
         }
-
+        if (!$entityAttribArray = $reader->getInheritedClassAnnotationArray($class, 'HireVoice\\Neo4j\\Annotation\\Entity')) {
+            throw new Exception("Problem loading inherited annotations from $className or one of its ancestors.");
+        }
+        
         $object = new self($class->getName());
         if ($entity->repositoryClass) {
             $object->repositoryClass = $entity->repositoryClass;
         }
-        if ($entity->labels) {
-            $object->labels = explode(",", $entity->labels);
+        
+        $object->labels = array();
+        foreach ($entityAttribArray as $entityAttrib) {
+            if ($entityAttrib->labels) {
+                $object->labels = array_merge($object->labels, explode(",", $entityAttrib->labels));
+            }
         }
-
+        $object->labels = array_unique($object->labels);
+        
         foreach (self::getClassProperties($class->getName()) as $prop) {
             $prop = new Property($reader, $prop);
             if ($prop->isPrimaryKey()) {
